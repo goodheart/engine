@@ -47,7 +47,9 @@ class SkiaFontCollection {
   /// Loads all of the unloaded fonts in [_unloadedFonts] and adds them
   /// to [_registeredFonts].
   Future<void> _loadFonts() async {
-    if (_unloadedFonts.isEmpty) return;
+    if (_unloadedFonts.isEmpty) {
+      return;
+    }
 
     final List<_RegisteredFont> loadedFonts = await Future.wait(_unloadedFonts);
     _registeredFonts.addAll(loadedFonts.where((x) => x != null));
@@ -170,11 +172,15 @@ class SkiaFontCollection {
     final js.JsObject tmpFontMgr =
         canvasKit['SkFontMgr'].callMethod('FromData', <Uint8List>[bytes]);
     String actualFamily = tmpFontMgr.callMethod('getFamilyName', <int>[0]);
+    tmpFontMgr.callMethod('delete');
     return actualFamily;
   }
 
   Future<ByteBuffer> _getArrayBuffer(dynamic fetchResult) {
-    return fetchResult.arrayBuffer().then<ByteBuffer>((x) => x as ByteBuffer);
+    // TODO(yjbanov): fetchResult.arrayBuffer is a dynamic invocation. Clean it up.
+    return fetchResult
+        .arrayBuffer()
+        .then<ByteBuffer>((dynamic x) => x as ByteBuffer);
   }
 
   js.JsObject skFontMgr;

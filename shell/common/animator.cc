@@ -36,7 +36,7 @@ Animator::Animator(Delegate& delegate,
       // https://github.com/flutter/engine/pull/9132 for discussion.
       layer_tree_pipeline_(fml::MakeRefCounted<LayerTreePipeline>(
           task_runners.GetPlatformTaskRunner() ==
-                  task_runners.GetGPUTaskRunner()
+                  task_runners.GetRasterTaskRunner()
               ? 1
               : 2)),
 #endif  // FLUTTER_SHELL_ENABLE_METAL
@@ -185,9 +185,12 @@ void Animator::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
   }
 
   // Commit the pending continuation.
-  producer_continuation_.Complete(std::move(layer_tree));
+  bool result = producer_continuation_.Complete(std::move(layer_tree));
+  if (!result) {
+    FML_DLOG(INFO) << "No pending continuation to commit";
+  }
 
-  delegate_.OnAnimatorDraw(layer_tree_pipeline_);
+  delegate_.OnAnimatorDraw(layer_tree_pipeline_, last_frame_target_time_);
 }
 
 bool Animator::CanReuseLastLayerTree() {

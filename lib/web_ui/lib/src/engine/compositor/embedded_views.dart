@@ -69,11 +69,9 @@ class HtmlViewEmbedder {
     switch (decoded.method) {
       case 'create':
         _create(decoded, callback);
-        window._replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
         return;
       case 'dispose':
         _dispose(decoded, callback);
-        window._replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
         return;
     }
     callback(null);
@@ -95,8 +93,8 @@ class HtmlViewEmbedder {
       return;
     }
 
-    final PlatformViewFactory factory =
-        platformViewRegistry.registeredFactories[viewType];
+    final ui.PlatformViewFactory factory =
+        ui.platformViewRegistry.registeredFactories[viewType];
     if (factory == null) {
       callback(codec.encodeErrorEnvelope(
         code: 'unregistered_view_type',
@@ -316,7 +314,9 @@ class HtmlViewEmbedder {
   /// Ensures we add a container of SVG path defs to the DOM so they can
   /// be referred to in clip-path: url(#blah).
   void _ensureSvgPathDefs() {
-    if (_svgPathDefs != null) return;
+    if (_svgPathDefs != null) {
+      return;
+    }
     _svgPathDefs = html.Element.html(
       '<svg width="0" height="0"><defs id="sk_path_defs"></defs></svg>',
       treeSanitizer: _NullTreeSanitizer(),
@@ -399,8 +399,12 @@ class EmbeddedViewParams {
   final MutatorsStack mutators;
 
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other is! EmbeddedViewParams) return false;
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! EmbeddedViewParams) {
+      return false;
+    }
 
     EmbeddedViewParams typedOther = other;
     return offset == typedOther.offset &&
@@ -456,8 +460,12 @@ class Mutator {
   double get alphaFloat => alpha / 255.0;
 
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other is! Mutator) return false;
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! Mutator) {
+      return false;
+    }
 
     final Mutator typedOther = other;
     if (type != typedOther.type) {
@@ -517,8 +525,12 @@ class MutatorsStack extends Iterable<Mutator> {
   }
 
   bool operator ==(dynamic other) {
-    if (identical(other, this)) return true;
-    if (other is! MutatorsStack) return false;
+    if (identical(other, this)) {
+      return true;
+    }
+    if (other is! MutatorsStack) {
+      return false;
+    }
 
     final MutatorsStack typedOther = other;
     if (_mutators.length != typedOther._mutators.length) {

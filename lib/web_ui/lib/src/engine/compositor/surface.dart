@@ -50,7 +50,9 @@ class Surface {
     final SkSurface surface = acquireRenderSurface(size);
     canvasKit.callMethod('setCurrentContext', <int>[surface.context]);
 
-    if (surface == null) return null;
+    if (surface == null) {
+      return null;
+    }
 
     SubmitCallback submitCallback =
         (SurfaceFrame surfaceFrame, SkCanvas canvas) {
@@ -112,15 +114,20 @@ class Surface {
       ..position = 'absolute'
       ..width = '${logicalSize.width.ceil()}px'
       ..height = '${logicalSize.height.ceil()}px';
-    final int glContext = canvasKit
-        .callMethod('GetWebGLContext', <html.CanvasElement>[htmlCanvas]);
+    final int glContext = canvasKit.callMethod('GetWebGLContext', <dynamic>[
+      htmlCanvas,
+      // Default to no anti-aliasing. Paint commands can be explicitly
+      // anti-aliased by setting their `Paint` object's `antialias` property.
+      js.JsObject.jsify({'antialias': 0}),
+    ]);
     final js.JsObject grContext =
-        canvasKit.callMethod('MakeGrContext', [glContext]);
+        canvasKit.callMethod('MakeGrContext', <dynamic>[glContext]);
     final js.JsObject skSurface =
         canvasKit.callMethod('MakeOnScreenGLSurface', <dynamic>[
       grContext,
       size.width,
       size.height,
+      canvasKit['SkColorSpace']['SRGB'],
     ]);
 
     htmlElement = htmlCanvas;
@@ -137,7 +144,7 @@ class Surface {
       return false;
     }
 
-    canvasKit.callMethod('setCurrentContext', [_surface.context]);
+    canvasKit.callMethod('setCurrentContext', <dynamic>[_surface.context]);
     _surface.getCanvas().flush();
     return true;
   }
@@ -151,7 +158,7 @@ class SkSurface {
   SkSurface(this._surface, this._glContext);
 
   SkCanvas getCanvas() {
-    final js.JsObject skCanvas = _surface.callMethod('getCanvas');
+    final js.JsObject/*!*/ skCanvas = _surface.callMethod('getCanvas');
     return SkCanvas(skCanvas);
   }
 

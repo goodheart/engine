@@ -67,6 +67,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     double width = 0.0,
     double height = 0.0,
     bool freeze = false,
+    ui.FilterQuality filterQuality = ui.FilterQuality.low,
   }) {
     // TODO(b/128315641): implement addTexture.
   }
@@ -205,7 +206,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     Float64List matrix4, {
     ui.EngineLayer oldLayer,
   }) {
-    final Matrix4 matrix = Matrix4.fromList(matrix4);
+    final Matrix4 matrix = Matrix4.fromFloat32List(toMatrix32(matrix4));
     pushLayer(TransformLayer(matrix));
     return null;
   }

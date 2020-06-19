@@ -18,24 +18,6 @@ const int kMaxScreenshotWidth = 1024;
 const int kMaxScreenshotHeight = 1024;
 const double kMaxDiffRateFailure = 0.28 / 100; // 0.28%
 
-class BrowserInstallerException implements Exception {
-  BrowserInstallerException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => message;
-}
-
-class DriverException implements Exception {
-  DriverException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => message;
-}
-
 abstract class PlatformBinding {
   static PlatformBinding get instance {
     if (_instance == null) {
@@ -71,8 +53,8 @@ const String _kBaseDownloadUrl =
 class _WindowsBinding implements PlatformBinding {
   @override
   int getChromeBuild(YamlMap browserLock) {
-    final YamlMap chromeMap = browserLock['chrome'];
-    return chromeMap['Win'];
+    final YamlMap chromeMap = browserLock['chrome'] as YamlMap;
+    return chromeMap['Win'] as int;
   }
 
   @override
@@ -110,8 +92,8 @@ class _WindowsBinding implements PlatformBinding {
 class _LinuxBinding implements PlatformBinding {
   @override
   int getChromeBuild(YamlMap browserLock) {
-    final YamlMap chromeMap = browserLock['chrome'];
-    return chromeMap['Linux'];
+    final YamlMap chromeMap = browserLock['chrome'] as YamlMap;
+    return chromeMap['Linux'] as int;
   }
 
   @override
@@ -151,8 +133,8 @@ class _LinuxBinding implements PlatformBinding {
 class _MacBinding implements PlatformBinding {
   @override
   int getChromeBuild(YamlMap browserLock) {
-    final YamlMap chromeMap = browserLock['chrome'];
-    return chromeMap['Mac'];
+    final YamlMap chromeMap = browserLock['chrome'] as YamlMap;
+    return chromeMap['Mac'] as int;
   }
 
   @override
@@ -192,10 +174,10 @@ class _MacBinding implements PlatformBinding {
 }
 
 class BrowserInstallation {
-  const BrowserInstallation(
-      {@required this.version,
-      @required this.executable,
-      fetchLatestChromeVersion});
+  const BrowserInstallation({
+    @required this.version,
+    @required this.executable,
+  });
 
   /// Browser version.
   final String version;
@@ -230,7 +212,7 @@ class BrowserLock {
   BrowserLock._() {
     final io.File lockFile = io.File(
         path.join(environment.webUiRootDir.path, 'dev', 'browser_lock.yaml'));
-    this._configuration = loadYaml(lockFile.readAsStringSync());
+    this._configuration = loadYaml(lockFile.readAsStringSync()) as YamlMap;
   }
 }
 
@@ -249,15 +231,12 @@ class DevNull implements StringSink {
   void writeln([Object obj = ""]) {}
 }
 
+/// Whether the felt command is running on Cirrus CI.
 bool get isCirrus => io.Platform.environment['CIRRUS_CI'] == 'true';
 
-/// There might be proccesses started during the tests.
-///
-/// Use this list to store those Processes, for cleaning up before shutdown.
-final List<io.Process> processesToCleanUp = List<io.Process>();
+/// Whether the felt command is running on LUCI.
+bool get isLuci => io.Platform.environment['LUCI_CONTEXT'] != null;
 
-/// There might be temporary directories created during the tests.
-///
-/// Use this list to store those directories and for deleteing them before
-/// shutdown.
-final List<io.Directory> temporaryDirectories = List<io.Directory>();
+/// Whether the felt command is running on one of the Continuous Integration
+/// environements.
+bool get isCi => isCirrus || isLuci;

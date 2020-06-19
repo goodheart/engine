@@ -16,7 +16,7 @@ typedef WebOnlyImageCodecChunkCallback = void Function(
 
 class HtmlCodec implements ui.Codec {
   final String src;
-  final WebOnlyImageCodecChunkCallback chunkCallback;
+  final WebOnlyImageCodecChunkCallback/*?*/ chunkCallback;
 
   HtmlCodec(this.src, {this.chunkCallback});
 
@@ -49,7 +49,7 @@ class HtmlCodec implements ui.Codec {
           imgElement.naturalHeight,
         );
         completer.complete(SingleFrameInfo(image));
-      }).catchError((e) {
+      }).catchError((dynamic e) {
         // This code path is hit on Chrome 80.0.3987.16 when too many
         // images are on the page (~1000).
         // Fallback here is to load using onLoad instead.
@@ -149,7 +149,7 @@ class HtmlImage implements ui.Image {
       return imgElement.clone(true);
     } else {
       _requiresClone = true;
-      imgElement.style..position = 'absolute';
+      imgElement.style.position = 'absolute';
       return imgElement;
     }
   }
